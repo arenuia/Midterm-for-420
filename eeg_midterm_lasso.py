@@ -1,7 +1,4 @@
- 
-# coding: utf-8
-
-# # Logistic Regression
+# Logistic Regression
 
 import pandas as pd
 import numpy as np
@@ -27,20 +24,13 @@ cwd = os.getcwd()
 #3.The errors are independent of each other.
 ##########################   Part1       #################################################
 print("#################   PART1    ###############")
-icu = pd.read_csv(os.path.join(cwd, 'icudata.csv'))
-#icu.columns = ['AGE', 'RACE', 'CPR', 'SYS', 'HRA' 'TYP']
+eeg = pd.read_csv(os.path.join(cwd, 'EEGEyeState.csv'))
+eeg.columns
 
-icu.isnull().sum()
+X = eeg.ix[:,(0,1,2,3,4,5,6,7,8,9,10,11,12,13)].values
+y = eeg.ix[:,14].values
 
-newrace = pd.get_dummies(icu['RACE'], prefix="RACE")
-newage = pd.get_dummies(icu['TYP'], prefix="TYP", drop_first=True)
-newcpr = pd.get_dummies(icu['CPR'], prefix="CPR", drop_first=True)
-icu.drop(['RACE', 'SEX', 'ID', 'TYP', 'CPR'], axis=1, inplace=True)
-icu = pd.concat([icu, newrace, newage, newcpr], axis=1)
-#print(icu.head())
-
-X = icu.ix[:,(1,2,3,4,5,6,7,8)].values
-y = icu.ix[:,0].values
+plt.plot(X, y)
 
 ### split data into training, test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3, random_state=123)
@@ -56,20 +46,20 @@ y_prob = LogReg.predict_proba(X_test)
 #print(LogReg.intercept_)
 #print(1/ (1 + np.exp(LogReg.intercept_)))
 #print(LogReg.coef_)
-#print(icu.head())
-
-
-
-
+#print(eeg.head())
+eeg.columns
 #############   LASSO   ##############
-predvar = icu.copy()
-target = predvar.STA 
-predictors = predvar[['AGE', 'SYS', 'HRA', 'RACE_1', 'RACE_2', 'RACE_3', 'CPR_1', 'TYP_1']].copy()
+predvar = eeg.copy()
+target = predvar.eyeDetection
+predictors = predvar[['AF3', 'F7', 'F3', 'FC5', 'T7', 'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4']].copy()
 
-for i in list(predictors.columns.values):
-    predictors[i] = preprocessing.scale(predictors[i].astype('float64'))
+list(predictors.columns.values)
+list(predictors.columns)
 
-pred_train, pred_test, resp_train, resp_test = train_test_split(predictors, target, test_size=.3, random_state=123)
+for i in ['AF3', 'F7', 'F3', 'FC5', 'T7', 'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4']:
+    predictors[i] = preprocessing.scale(list(predictors[i].astype('float64')))
+
+pred_train, pred_test, resp_train, resp_test = train_test_split(predictors, target, test_size=.3, random_state=30192)
 model=LassoLarsCV(cv=10, precompute=True).fit(pred_train,resp_train)
 dict(zip(predictors.columns, model.coef_))
 m_log_alphascv = -np.log10(model.cv_alphas_)
@@ -88,9 +78,11 @@ plt.title('Mean squared error on each fold')
 #plt.show()
 print(model.alpha_)
 print(model.coef_)
-#print(model.intercept_)
-#print(pred_train.head())
+print(model.intercept_)
+print(pred_train.head())
 
+np.unique(model.predict(pred_test))
+model
 ########################################################################################
 ###########################   Part 1 RESPONSE            ##############################
 #######################################################################################
@@ -103,7 +95,7 @@ print(model.coef_)
 
 #c.             Optimal alpha value from the Lasso section: 0.0013716207531124826
 
-#d. 
+#d.
                 #The coefficients are:
                 #AGE: 0.05951659
                 #SYS: -0.04463656
@@ -168,14 +160,14 @@ print(model.alpha_)
 
 #####   Coefficients:  #######
 #('TAG__youth', 11482.475855432787)
-#('TAG__speech', 12491.39328459928), 
-#('TAG__drones', #15345.191339397952), 
-#('TAG__time', 17980.39505624095), 
-#('TAG__live music', #25851.14506061892), 
-#('TAG__relationships', 31360.70940593261), 
-#('TAG__performance', #37747.12675614984), 
-#('TAG__success', 53097.30272017584), 
-#('TAG__body language', #54897.38713288022), 
+#('TAG__speech', 12491.39328459928),
+#('TAG__drones', #15345.191339397952),
+#('TAG__time', 17980.39505624095),
+#('TAG__live music', #25851.14506061892),
+#('TAG__relationships', 31360.70940593261),
+#('TAG__performance', #37747.12675614984),
+#('TAG__success', 53097.30272017584),
+#('TAG__body language', #54897.38713288022),
 #('TAG__magic', 147920.41349920526)]
 
 
