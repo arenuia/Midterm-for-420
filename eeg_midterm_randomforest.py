@@ -16,12 +16,24 @@ y = eeg.ix[:,14].values
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3, random_state=123)
 tree_classf = RandomForestClassifier(n_estimators=10)
 tree_classf.fit(X_train, y_train)
-y_probs = tree_classf.predict_proba(X_test)
-y_preds = y_probs[:,1]
-fpr, tpr, threshold = roc_curve(y_test, y_preds)
-roc_auc = auc(fpr, tpr)
+
+# Find ROC and AUC of train set
+y_probs_train = tree_classf.predict_proba(X_train)
+y_preds_train = y_probs_train[:,1]
+fpr_train, tpr_train, threshold_train = roc_curve(y_train, y_preds_train)
+roc_auc_train = auc(fpr_train, tpr_train)
+
+# Find ROC and AUC of test set
+y_probs_test = tree_classf.predict_proba(X_test)
+y_preds_test = y_probs_test[:,1]
+fpr_test, tpr_test, threshold_test = roc_curve(y_test, y_preds_test)
+roc_auc_test = auc(fpr_test, tpr_test)
+
+# Plot it all
 plt.title('ROC Curve')
-plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+plt.plot(fpr_train, tpr_test, 'r', label = 'Train: AUC = %0.2f' % roc_auc_train)
+plt.plot(fpr_test, tpr_test, 'b', label = 'Test: AUC = %0.2f' % roc_auc_test)
+plt.plot()
 plt.legend(loc = 'lower right')
 plt.plot([0, 1], [0, 1],'r--')
 plt.xlim([0, 1])
