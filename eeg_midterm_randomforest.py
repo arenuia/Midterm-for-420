@@ -41,9 +41,11 @@ max(y_test.mean(), 1 - y_test.mean())
 cf_mx = metrics.confusion_matrix(y_test, y_bipreds_test)
 cm_df = pd.DataFrame(cf_mx, range(2), range(2))
 # Graphing Confusion Matrix
-sn.heatmap(cm_df, annot=True, annot_kws={"size": 12})
+ax = sn.heatmap(cm_df, annot=True, annot_kws={"size": 12})
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
+ax.xaxis.tick_top()
+
 
 ## ROC and AUC
 # Find ROC and AUC of train set
