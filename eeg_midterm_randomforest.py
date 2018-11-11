@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
+import seaborn as sn
 
 import os
 cwd = os.getcwd()
@@ -35,6 +36,14 @@ max(y_test.mean(), 1 - y_test.mean())
 # We get better accuracy given that we use this Random Forest model, with an
 # increase of accuracy of 34.312%.
 
+
+## Confusion Matrix
+cf_mx = metrics.confusion_matrix(y_test, y_bipreds_test)
+cm_df = pd.DataFrame(cf_mx, range(2), range(2))
+# Graphing Confusion Matrix
+sn.heatmap(cm_df, annot=True, annot_kws={"size": 12})
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
 
 ## ROC and AUC
 # Find ROC and AUC of train set
