@@ -38,13 +38,15 @@ max(y_test.mean(), 1 - y_test.mean())
 
 
 ## Confusion Matrix
-cf_mx = metrics.confusion_matrix(y_test, y_bipreds_test)
-cm_df = pd.DataFrame(cf_mx, range(2), range(2))
+# On Test Data
+cf_mx_test = metrics.confusion_matrix(y_test, y_bipreds_test)
+cm_df_test = pd.DataFrame(cf_mx_test, range(2), range(2))
 # Graphing Confusion Matrix
-ax = sn.heatmap(cm_df, annot=True, annot_kws={"size": 12})
+ax_test = sn.heatmap(cm_df_test, annot=True, cmap='Blues', fmt='g')
+plt.title("Test Confusion Matrix")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
-ax.xaxis.tick_top()
+ax_test.xaxis.tick_top()
 
 
 ## ROC and AUC
