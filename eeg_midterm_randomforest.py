@@ -47,7 +47,7 @@ plt.title("Test Confusion Matrix")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 ax_test.xaxis.tick_top()
-
+plt.savefig("Conf_Matrix.png")
 
 ## ROC and AUC
 # Find ROC and AUC of train set
@@ -73,4 +73,5 @@ plt.xlim([0, 1])
 plt.ylim([0, 1])
 plt.ylabel('True Positive Rate')
 plt.xlabel('False Positive Rate')
+plt.savefig("ROC_Curve.png")
 plt.show()
