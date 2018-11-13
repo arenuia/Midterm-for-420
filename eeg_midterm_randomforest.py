@@ -16,8 +16,9 @@ eeg = pd.read_csv(os.path.join(cwd, 'EEGEyeState.csv'))
 X = eeg.ix[:,(0,1,2,3,4,5,6,7,8,9,10,11,12,13)].values
 y = eeg.ix[:,14].values
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3, random_state=123)
-tree_classf = RandomForestClassifier(n_estimators=10)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3, random_state=420)
+# n_estimators = 100
+tree_classf = RandomForestClassifier(n_estimators=100)
 tree_classf.fit(X_train, y_train)
 
 
@@ -39,24 +40,18 @@ max(y_test.mean(), 1 - y_test.mean())
 
 ## Confusion Matrix
 # On Test Data
-cf_mx_test = metrics.confusion_matrix(y_test, y_bipreds_test)
-cm_df_test = pd.DataFrame(cf_mx_test, range(2), range(2))
+cf_mX_test = metrics.confusion_matrix(y_test, y_bipreds_test)
+cm_df_test = pd.DataFrame(cf_mX_test, range(2), range(2))
 # Graphing Confusion Matrix
-ax_test = sn.heatmap(cm_df_test, annot=True, cmap='Blues', fmt='g')
+aX_test = sn.heatmap(cm_df_test, annot=True, cmap='Blues', fmt='g')
 plt.title("Test Confusion Matrix")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
-ax_test.xaxis.tick_top()
+aX_test.xaxis.tick_top()
 plt.savefig("Conf_Matrix.png")
 
 ## ROC and AUC
-# Find ROC and AUC of train set
-y_probs_train = tree_classf.predict_proba(X_train)
-y_preds_train = y_probs_train[:,1]
-fpr_train, tpr_train, threshold_train = roc_curve(y_train, y_preds_train)
-roc_auc_train = auc(fpr_train, tpr_train)
-
-# Find ROC and AUC of test set
+# Find ROC and AUC of n_estimators
 y_probs_test = tree_classf.predict_proba(X_test)
 y_preds_test = y_probs_test[:,1]
 fpr_test, tpr_test, threshold_test = roc_curve(y_test, y_preds_test)
@@ -64,8 +59,7 @@ roc_auc_test = auc(fpr_test, tpr_test)
 
 # Plot it all
 plt.title('ROC Curve')
-plt.plot(fpr_train, tpr_test, 'orange', label = 'Train: AUC = %0.2f' % roc_auc_train)
-plt.plot(fpr_test, tpr_test, 'b', label = 'Test: AUC = %0.2f' % roc_auc_test)
+plt.plot(fpr_test, tpr_test, 'b', label = 'Model 1: AUC = %0.2f' % roc_auc_test)
 plt.plot()
 plt.legend(loc = 'lower right')
 plt.plot([0, 1], [0, 1],'r--')
@@ -74,4 +68,28 @@ plt.ylim([0, 1])
 plt.ylabel('True Positive Rate')
 plt.xlabel('False Positive Rate')
 plt.savefig("ROC_Curve.png")
+plt.show()
+
+
+## Parameter Testing
+n_estimators = [1, 2, 4, 8, 16, 32, 64, 100, 200]
+train_results = []
+test_results = []
+for estimator in n_estimators:
+   rf = RandomForestClassifier(n_estimators=estimator, n_jobs=-1)
+   rf.fit(X_train, y_train)
+   train_pred = rf.predict(X_train)
+   false_positive_rate, true_positive_rate, thresholds = roc_curve(y_train, train_pred)
+   roc_auc = auc(false_positive_rate, true_positive_rate)
+   train_results.append(roc_auc)
+   y_pred = rf.predict(X_test)
+   false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
+   roc_auc = auc(false_positive_rate, true_positive_rate)
+   test_results.append(roc_auc)
+from matplotlib.legend_handler import HandlerLine2D
+line1, = plt.plot(n_estimators, train_results, 'b', label="Train AUC")
+line2, = plt.plot(n_estimators, test_results, 'r', label="Test AUC")
+plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+plt.ylabel('AUC score')
+plt.xlabel('n_estimators')
 plt.show()
