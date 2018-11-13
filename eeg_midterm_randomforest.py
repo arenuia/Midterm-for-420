@@ -18,7 +18,7 @@ y = eeg.ix[:,14].values
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3, random_state=420)
 # n_estimators = 100
-tree_classf = RandomForestClassifier(n_estimators=100)
+tree_classf = RandomForestClassifier(n_estimators=10)
 tree_classf.fit(X_train, y_train)
 
 
@@ -58,8 +58,8 @@ fpr_test, tpr_test, threshold_test = roc_curve(y_test, y_preds_test)
 roc_auc_test = auc(fpr_test, tpr_test)
 
 # Plot it all
-plt.title('ROC Curve')
-plt.plot(fpr_test, tpr_test, 'b', label = 'Model 1: AUC = %0.2f' % roc_auc_test)
+plt.title('Default Parameters: ROC Curve')
+plt.plot(fpr_test, tpr_test, 'b', label = 'AUC = %0.2f' % roc_auc_test)
 plt.plot()
 plt.legend(loc = 'lower right')
 plt.plot([0, 1], [0, 1],'r--')
@@ -72,6 +72,8 @@ plt.show()
 
 
 ## Parameter Testing
+# Copied from https://medium.com/all-things-ai/in-depth-parameter-tuning-for-random-forest-d67bb7e920d #
+# ROC Optimization
 n_estimators = [1, 2, 4, 8, 16, 32, 64, 100, 200]
 train_results = []
 test_results = []
@@ -89,7 +91,33 @@ for estimator in n_estimators:
 from matplotlib.legend_handler import HandlerLine2D
 line1, = plt.plot(n_estimators, train_results, 'b', label="Train AUC")
 line2, = plt.plot(n_estimators, test_results, 'r', label="Test AUC")
+plt.title("N of Estimators Variation")
 plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
 plt.ylabel('AUC score')
 plt.xlabel('n_estimators')
+plt.savefig("NEstimatorsVar.png")
+plt.show()
+
+# Tree Depth Optimization
+max_depths = np.linspace(1, 50, 100, endpoint=True)
+train_results = []
+test_results = []
+for max_depth in max_depths:
+   rf = RandomForestClassifier(max_depth=max_depth, n_jobs=-1)
+   rf.fit(X_train, y_train)
+   train_pred = rf.predict(X_train)
+   false_positive_rate, true_positive_rate, thresholds = roc_curve(y_train, train_pred)
+   roc_auc = auc(false_positive_rate, true_positive_rate)
+   train_results.append(roc_auc)
+   y_pred = rf.predict(X_test)
+   false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
+   roc_auc = auc(false_positive_rate, true_positive_rate)
+   test_results.append(roc_auc)
+line1, = plt.plot(max_depths, train_results, 'b', label="Train AUC")
+line2, = plt.plot(max_depths, test_results, 'r', label="Test AUC")
+plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+plt.ylabel('AUC score')
+plt.xlabel('Tree depth')
+plt.title("Tree Depth Variation")
+plt.savefig("DepthVariation.png")
 plt.show()
